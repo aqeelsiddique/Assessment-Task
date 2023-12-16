@@ -7,6 +7,7 @@ import {
   Container,
   Paper,
 } from '@mui/material';
+import { useTheme } from '@mui/material';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,8 @@ const RegisterForm = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  const theme = useTheme();
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +95,8 @@ const RegisterForm = () => {
             variant="contained"
             color="primary"
             fullWidth
-            style={{ marginTop: 20 }}
+            style={{ marginTop: 20, background: theme.palette.warning.light }}
+            
           >
             Register
           </Button>
