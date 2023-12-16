@@ -6,8 +6,11 @@ import {
   Button,
   Container,
   Paper,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useTheme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -17,31 +20,47 @@ const RegisterForm = () => {
     cpassword: '',
   });
 
+  const [error, setError] = useState(null); // State to manage registration errors
+  const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
+  const theme = useTheme();
+  const navigate = useNavigate(); // Access the navigate function
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(null); // Clear previous error when the user starts typing again
   };
-  const theme = useTheme();
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Make a POST request to your API endpoint
       const response = await axios.post('/api/v1/register', formData);
 
-      // Check the response status
       if (response.status === 200) {
-        // Registration successful, you can handle the response data here
+        // Registration successful, show success snackbar
+        setSuccessSnackbarOpen(true);
         console.log('Registration successful:', response.data);
+
+        // Delay the navigation after showing the success message
+        setTimeout(() => {
+          // Redirect to the desired page using navigate
+          navigate('/signin'); // Change '/login' to the desired page path
+        }, 3000); // 5000 milliseconds (5 seconds)
       } else {
         // Registration failed, handle the error
         console.error('Registration failed:', response.data);
+        setError(response.data.error); // Set error state with the server message
       }
     } catch (error) {
-      // Handle other errors, such as network issues
       console.error('Error during registration:', error.message);
+      setError('An error occurred. Please try again later.'); // Set a generic error message
     }
+
+
+  };
+
+  const handleSnackbarClose = () => {
+    setSuccessSnackbarOpen(false);
   };
 
   return (
@@ -50,6 +69,7 @@ const RegisterForm = () => {
         <Typography variant="h4" align="center" gutterBottom>
           Register
         </Typography>
+        {error && <Alert severity="error">{error}</Alert>} {/* Display error if exists */}
         <form onSubmit={handleSubmit}>
           <TextField
             label="Name"
@@ -96,12 +116,19 @@ const RegisterForm = () => {
             color="primary"
             fullWidth
             style={{ marginTop: 20, background: theme.palette.warning.light }}
-            
           >
             Register
           </Button>
         </form>
       </Paper>
+
+      {/* Snackbar for success message */}
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={3000} // Adjust the duration as needed
+        onClose={handleSnackbarClose}
+        message="Registration successful!"
+      />
     </Container>
   );
 };

@@ -6,6 +6,7 @@ import {
   Button,
   Paper,
   Grid,
+  Container,
 } from '@mui/material';
 
 const UserProfile = () => {
@@ -67,47 +68,77 @@ const UserProfile = () => {
   };
 
   return (
-    <Grid container spacing={2} justifyContent="center">
-      <Grid item xs={8}>
-        <Paper elevation={3} style={{ padding: 20 }}>
-          <Typography variant="h4" gutterBottom>
-            User Profile
-          </Typography>
-          {mode === 'view' ? (
-            <div>
-              <Typography variant="h6">Name: {name}</Typography>
-              <Typography variant="h6">Email: {email}</Typography>
-              <Button variant="outlined" onClick={toggleMode}>
-                Edit Profile
-              </Button>
-            </div>
-          ) : (
-            <form>
-              <TextField
-                label="Name"
-                fullWidth
-                margin="normal"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <TextField
-                label="Email"
-                fullWidth
-                margin="normal"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Button variant="contained" onClick={handleUpdateProfile}>
-                Update Profile
-              </Button>
-              <Button variant="outlined" onClick={toggleMode}>
-                Cancel
-              </Button>
-            </form>
-          )}
-        </Paper>
-      </Grid>
-    </Grid>
+    <Container component="main" maxWidth="xs">
+
+      <h1>WELLCOME</h1>
+      <Paper elevation={3} style={{ padding: 20, marginTop: 20 }}>
+        <Typography variant="h4" gutterBottom>
+          User Profile
+        </Typography>
+        <form>
+          <Grid container spacing={2}>
+            {mode === 'view' ? (
+              <>
+                <Grid item xs={12}>
+                  <Typography variant="h6">Name: {name}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="h6">Email: {email}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={toggleMode}
+                  >
+                    Edit Profile
+                  </Button>
+                </Grid>
+              </>
+            ) : (
+              <>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Name"
+                    fullWidth
+                    margin="normal"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Email"
+                    fullWidth
+                    margin="normal"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={handleUpdateProfile}
+                  >
+                    Update Profile
+                  </Button>
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={toggleMode}
+                  >
+                    Cancel
+                  </Button>
+                </Grid>
+              </>
+            )}
+          </Grid>
+        </form>
+      </Paper>
+    </Container>
   );
 };
 
