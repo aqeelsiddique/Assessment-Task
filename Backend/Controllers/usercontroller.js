@@ -13,37 +13,37 @@ const { merge } = require("../app");
 /////////////send email
 /// Register A User
 exports.registerUser = catchayncerror(async (req, res, next) => {
-  // Commented out Cloudinary-related code for now
-  // const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-  //   folder: "avatars",
-  //   width: 150,
-  //   crop: "scale",
-  // });
-
   const { name, email, password, cpassword } = req.body;
 
   try {
+    // Check if the email already exists in the database
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      // If email exists, return an error response
+      return res.status(400).json({
+        success: false,
+        error: 'Email already in use. Please choose a different email.',
+      });
+    }
+
+    // If email doesn't exist, create a new user
     const user = await User.create({
       name,
       email,
       password,
       cpassword,
-      // avatar: {
-      //   public_id: myCloud.public_id,
-      //   url: myCloud.secure_url,
-      // },
     });
 
+    // Generate a token and send a success response
     const token = user.generateAuthToken();
-
-    // Send a JSON response
     res.status(200).json({
       success: true,
       user,
       token,
     });
   } catch (error) {
-    // Handle errors and send an error response
+    // Handle other errors
     res.status(500).json({
       success: false,
       error: error.message,
@@ -53,54 +53,51 @@ exports.registerUser = catchayncerror(async (req, res, next) => {
 
 /////////////////////////////////////////////User A login
 
-exports.loginUser = catchayncerror(async (req, res, next) => {
-  try {
-    const { name, password } = req.body;
 
-    // Check if the user has provided both email and password
-    if (!name || !password) {
-      return next(new ErrorHandler("Please Enter Email & Password", 400));
-    }
-
-    // Search for the user by email
-    const userLogin = await User.findOne({ name }).select("+password");
-
-    if (userLogin) {
-      // Debugging: Print provided and stored passwords
-      console.log('Provided Password:', password);
-      console.log('Stored Password:', userLogin.password); // Assuming the stored password is accessible
-
-      const isMatch = await bcrypt.compare(password, userLogin.password);
-
-      
-      const token = await userLogin.generateAuthToken();
-
-      // Debugging: Print the user object
-      console.log('User Object:', userLogin);
-
-      // Set the JWT token as a cookie
-      res.cookie("jwttoken", token, {
-        expires: new Date(Date.now() + 25892000000),
-        httpOnly: true,
-      });
-
-      // If passwords match, send the token and a success message
-      if (isMatch) {
-        sendToken(userLogin, 200, res);
-        res.send({ message: "Welcome, user logged in successfully" });
-      } else {
-        // If passwords do not match, return an error
-        return next(new ErrorHandler("Invalid Password", 400));
-      }
-    } else {
-      // If no user is found, return an error
-      res.status(422).send({ message: "Invalid Email or Password" });
-    }
-  } catch (err) {
-    console.log(err);
-    next(err); // Pass the error to the error handler middleware
+exports.loginUser = catchayncerror(async (req, res, next) =>{
+  //this code line means agr humy specfie data chaiyae tu yeh estmal kr sgthy
+try {
+  const {email, password} = req.body;
+  ////////////check if user has given the both right password and name
+  if (!email || !password) {
+      return next(new ErrorHandler("Please Enter Email & Password", 400))
   }
-});
+  const userlogin = await User.findOne({ email }).select("+password");
+
+  if (userlogin){
+      const isMatch = await userlogin.comparePassword(password);
+
+      token = await userlogin.generateAuthToken();
+      console.log(token);
+      res.cookie("jwttoken", token , {
+        expires:new Date(Date.now() + 25892000000),
+        httpOnly:true
+      })
+      ///create a cokki4res.cokkie
+      if(!isMatch) {
+          return next(new ErrorHandler("User Error", 400));          
+      } 
+
+      else {
+        sendToken(userlogin, 200, res)
+                  res.cookie('jwttoken', token, {
+            expires: new Date(Date.now() + 25892000000),
+            httpOnly: true
+        })       
+          res.send({meassage:" wellcome user login sucessfully"})            
+      }
+  }
+   else {
+      res.status(422).send({message: "invalid"})       
+     }   
+}
+
+catch(err)
+{
+ console.log(err);
+}
+})
+
 
 
 /////////////////
