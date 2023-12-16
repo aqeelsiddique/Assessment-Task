@@ -11,6 +11,7 @@ import Signup from "./Components/Signup";
 import pageerror from './Components/pageerror';
 import LoginForm from './Components/Signin';
 import UserList from './Components/UserLists';
+import UserProfile from './Components/UserProfile';
  const App = () => {
   return (
     <div>
@@ -23,6 +24,8 @@ import UserList from './Components/UserLists';
         <Route path="/signin" element={<LoginForm />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/userlists" element={<UserList />} />
+        <Route path="/userprofile" element={<UserProfile />} />
+
 
 
       
