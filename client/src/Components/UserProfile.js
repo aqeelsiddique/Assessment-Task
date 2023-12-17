@@ -7,12 +7,17 @@ import {
   Paper,
   Grid,
   Container,
+  Snackbar,
+  Alert,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [mode, setMode] = useState('view'); // 'view' or 'edit'
+  const [logoutSuccess, setLogoutSuccess] = useState(false); // State for logout success
+  const navigate = useNavigate(); // Access the navigate function
 
   useEffect(() => {
     // Fetch user profile data when the component mounts
@@ -20,12 +25,11 @@ const UserProfile = () => {
       try {
         const response = await axios.get('/api/v1/me', {
           headers: {
-            Authorization: `Bearer YOUR_JWT_TOKEN`, // Include the actual token in the headers
+            Authorization: `Bearer YOUR_JWT_TOKEN`,
           },
         });
 
         if (response.status === 200) {
-          // Set the user profile data in state
           setName(response.data.user.name);
           setEmail(response.data.user.email);
         } else {
@@ -37,24 +41,23 @@ const UserProfile = () => {
     };
 
     fetchUserProfile();
-  }, []); // The empty dependency array ensures that this effect runs once when the component mounts
+  }, []);
 
   const handleUpdateProfile = async () => {
     try {
-      // Make a PUT request to update the user profile
       const response = await axios.put(
         '/api/v1/me/update',
         { name, email },
         {
           headers: {
-            Authorization: `Bearer YOUR_JWT_TOKEN`, // Include the actual token in the headers
+            Authorization: `Bearer YOUR_JWT_TOKEN`,
           },
         }
       );
 
       if (response.status === 200) {
         console.log('User profile updated successfully');
-        setMode('view'); // Switch back to view mode after updating
+        setMode('view');
       } else {
         console.error('Failed to update user profile:', response.data.message);
       }
@@ -63,14 +66,40 @@ const UserProfile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get('/api/v1/logout');
+
+      if (response.status === 200) {
+        // Logout successful
+        console.log('Logout successful');
+        setLogoutSuccess(true);
+
+        // Delay the navigation for 1 second
+        setTimeout(() => {
+          // Navigate to the login page
+          navigate('/signin');
+        }, 1000);
+      } else {
+        // Logout failed
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error.message);
+    }
+  };
+
   const toggleMode = () => {
     setMode((prevMode) => (prevMode === 'view' ? 'edit' : 'view'));
   };
 
+  const handleAlertClose = () => {
+    setLogoutSuccess(false);
+  };
+
   return (
     <Container component="main" maxWidth="xs">
-
-      <h1>WELLCOME</h1>
+      <h1>WELCOME</h1>
       <Paper elevation={3} style={{ padding: 20, marginTop: 20 }}>
         <Typography variant="h4" gutterBottom>
           User Profile
@@ -86,12 +115,13 @@ const UserProfile = () => {
                   <Typography variant="h6">Email: {email}</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={toggleMode}
-                  >
+                  <Button variant="outlined" fullWidth onClick={toggleMode}>
                     Edit Profile
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button variant="outlined" fullWidth onClick={handleLogout}>
+                    Logout
                   </Button>
                 </Grid>
               </>
@@ -125,11 +155,7 @@ const UserProfile = () => {
                   </Button>
                 </Grid>
                 <Grid item xs={6}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
-                    onClick={toggleMode}
-                  >
+                  <Button variant="outlined" fullWidth onClick={toggleMode}>
                     Cancel
                   </Button>
                 </Grid>
@@ -138,6 +164,17 @@ const UserProfile = () => {
           </Grid>
         </form>
       </Paper>
+
+      {/* Snackbar for logout success message */}
+      <Snackbar
+        open={logoutSuccess}
+        autoHideDuration={3000}
+        onClose={handleAlertClose}
+      >
+        <Alert severity="success" onClose={handleAlertClose}>
+          Logout successful!
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
